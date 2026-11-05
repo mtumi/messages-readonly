@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>messages-readonly</title>
+<meta name="description" content="Let Claude read your iMessage history on a Mac, without giving Claude Full Disk Access and with no way to send.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{--bg:#EDEFF2;--surface:#F8F9FB;--raised:#FFFFFF;--sunken:#F1F3F6;--ink:#171C24;--ink-2:#39434F;--muted:#5C6674;--line:#D3D8DF;--line-soft:#E3E7EC;--accent:#1F6F6A;--accent-soft:#DCEAE8;--you:#8A5A12;--you-soft:#F2E7D2;--work:#3B5A7A;--work-soft:#DFE7F0;--urgent:#A33B2A;--urgent-soft:#F6DFDA;--shadow:0 1px 2px rgba(23,28,36,.06),0 4px 14px rgba(23,28,36,.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F131A;--surface:#161C24;--raised:#1B222B;--sunken:#12171E;--ink:#E5E9EE;--ink-2:#BCC5D0;--muted:#8F99A7;--line:#28313D;--line-soft:#222A34;--accent:#54ADA5;--accent-soft:#17332F;--you:#C99C4C;--you-soft:#33280F;--work:#83A5C9;--work-soft:#1A2735;--urgent:#DC7660;--urgent-soft:#3A1F19;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3)}}
+:root[data-theme="dark"]{--bg:#0F131A;--surface:#161C24;--raised:#1B222B;--sunken:#12171E;--ink:#E5E9EE;--ink-2:#BCC5D0;--muted:#8F99A7;--line:#28313D;--line-soft:#222A34;--accent:#54ADA5;--accent-soft:#17332F;--you:#C99C4C;--you-soft:#33280F;--work:#83A5C9;--work-soft:#1A2735;--urgent:#DC7660;--urgent-soft:#3A1F19;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.mono,.eyebrow,.chip,.k,.toc a,.bar-label,button,footer{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:58rem;margin:0 auto;padding:2.5rem 1.5rem 5rem;display:flex;flex-direction:column;gap:2.5rem}
+.mast{display:flex;flex-direction:column;gap:.6rem;padding-bottom:1.5rem;border-bottom:2px solid var(--ink)}
+.eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(2rem,5vw,2.9rem);line-height:1.08;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.standfirst{margin:.15rem 0 0;color:var(--ink-2);max-width:64ch;font-size:1.1rem}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.chip{font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .5rem;border-radius:2px;border:1px solid transparent;white-space:nowrap}
+.chip.accent{background:var(--accent-soft);color:var(--accent)}
+.chip.work{background:var(--work-soft);color:var(--work)}
+.chip.you{background:var(--you-soft);color:var(--you)}
+.chip.id{background:var(--ink);color:var(--bg)}
+.toc{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;padding-top:.4rem}
+.toc a{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+.lane{display:flex;flex-direction:column;gap:1rem;scroll-margin-top:1.5rem}
+.lane-head{display:flex;flex-direction:column;gap:.3rem;padding-left:.85rem;border-left:3px solid var(--rail)}
+.lane.accent{--rail:var(--accent)}.lane.you{--rail:var(--you)}.lane.work{--rail:var(--work)}.lane.urgent{--rail:var(--urgent)}.lane.muted{--rail:var(--muted)}
+h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.5rem;margin:0;letter-spacing:-.01em}
+.lane-sub{margin:0;color:var(--muted);font-size:.95rem;max-width:62ch}
+.item{background:var(--raised);border:1px solid var(--line);border-radius:4px;padding:1.15rem 1.25rem;display:flex;flex-direction:column;gap:.6rem;box-shadow:var(--shadow)}
+.item.you{border-color:var(--you);background:linear-gradient(var(--you-soft),var(--you-soft)) top/100% 3px no-repeat,var(--raised)}
+.item h3{font-weight:600;font-size:1.14rem;line-height:1.35;margin:0}
+.item p{margin:0;color:var(--ink-2);max-width:68ch}
+.item p strong{color:var(--ink)}
+ul.tight,ol.tight{margin:0;padding-left:1.15rem;color:var(--ink-2);max-width:68ch}
+ul.tight li,ol.tight li{margin:.25rem 0}
+ul.tight li strong,ol.tight li strong{color:var(--ink)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:.6rem}
+.node{border:1px solid var(--line);border-radius:3px;background:var(--surface);padding:.75rem .85rem;display:flex;flex-direction:column;gap:.2rem}
+.node .k{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.node b{font-size:1rem;line-height:1.3}
+.node span{font-size:.88rem;color:var(--ink-2);line-height:1.4}
+.node.key{border-color:var(--accent);background:var(--accent-soft)}
+.node.key .k{color:var(--accent)}
+.arrow{align-self:center;color:var(--muted);font-family:"JetBrains Mono",monospace}
+.field{display:flex;gap:.8rem;align-items:baseline;padding:.55rem 0;border-top:1px solid var(--line-soft)}
+.field:first-of-type{border-top:none;padding-top:0}
+.field .k{font-size:.66rem;letter-spacing:.06em;color:var(--muted);flex:0 0 19rem;overflow-wrap:anywhere}
+.field .v{color:var(--ink-2);min-width:0}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s;display:flex;flex-direction:column;gap:.55rem}
+.steps li{counter-increment:s;position:relative;padding-left:2.35rem;color:var(--ink-2)}
+.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:.2em;font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:600;color:var(--accent)}
+.prompt{border:1px solid var(--line);border-radius:3px;background:var(--sunken);overflow:hidden}
+.prompt-bar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.4rem .65rem;background:var(--surface);border-bottom:1px solid var(--line-soft)}
+.bar-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+button{font-size:.65rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:1px solid var(--line);background:var(--raised);color:var(--ink-2);padding:.25rem .6rem;border-radius:2px;white-space:nowrap}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.ok{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.prompt pre{margin:0;padding:.75rem .85rem;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.78rem;line-height:1.65;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.tabs{display:flex;gap:.35rem}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabpanel{display:flex;flex-direction:column;gap:.6rem}
+.tabpanel[hidden]{display:none}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.split .item h3{display:flex;align-items:center;gap:.5rem}
+ul.yes,ul.no{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem;color:var(--ink-2)}
+ul.yes li,ul.no li{padding-left:1.4rem;position:relative}
+ul.yes li::before,ul.no li::before{position:absolute;left:0;font-family:"JetBrains Mono",monospace;font-weight:600}
+ul.yes li::before{content:"✓";color:var(--accent)}
+ul.no li::before{content:"!";color:var(--urgent);left:.25rem}
+.fold{border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+.fold>summary{cursor:pointer;padding:.65rem .9rem;font-weight:600;color:var(--ink);list-style:none}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::before{content:"▸ ";font-family:"JetBrains Mono",monospace;color:var(--accent)}
+.fold[open]>summary::before{content:"▾ "}
+.fold p{margin:0;padding:0 .9rem .85rem 2rem;color:var(--ink-2);max-width:68ch}
+.folds{display:flex;flex-direction:column;gap:.5rem}
+.note{font-size:.92rem;color:var(--muted);max-width:68ch;margin:0}
+code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.84em;background:var(--surface);border:1px solid var(--line-soft);border-radius:2px;padding:.06em .32em;color:var(--ink);word-break:break-word}
+footer{border-top:1px solid var(--line);padding-top:1.25rem;color:var(--muted);font-size:.74rem;line-height:1.75}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.theme{position:fixed;top:.9rem;right:1rem;z-index:2}
+@media (max-width:720px){
+  .wrap{padding:3rem 1rem 4rem}
+  .flow{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg);justify-self:center}
+  .split{grid-template-columns:1fr}
+  .field{flex-direction:column;gap:.2rem}
+  .field .k{flex:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<button class="theme" id="theme" type="button" aria-label="Switch light or dark">Light / dark</button>
+<div class="wrap">
+
+<header class="mast">
+  <span class="eyebrow">Open source · macOS · For Claude Desktop and Claude Code</span>
+  <h1>messages-readonly</h1>
+  <p class="standfirst">Lets Claude read your iMessage and SMS history on a Mac, without giving Claude Full Disk Access and without giving this setup any way to send a text.</p>
+  <div class="meta">
+    <span class="chip accent">Read-only</span><span class="chip accent">No send tool</span><span class="chip accent">No network</span><span class="chip work">Free · MIT license</span>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#how">How it works</a><a href="#why">Why</a><a href="#adds">What it adds</a><a href="#install">Install</a><a href="#use">Using it</a><a href="#security">Security</a><a href="#trouble">Troubleshooting</a><a href="#uninstall">Uninstall</a><a href="#limits">Limits</a><a href="#disclaimer">Disclaimer</a>
+  </nav>
+</header>
+
+<section class="lane accent" id="how">
+  <div class="lane-head">
+    <h2>How it works</h2>
+    <p class="lane-sub">Ask Claude things like "who did I text last night?" or "what time did we agree on for dinner?" and it answers from your own messages.</p>
+  </div>
+  <div class="item">
+    <div class="flow" role="img" aria-label="Messages databases, copied hourly by the helper app, read by the connector, used by Claude">
+      <div class="node"><span class="k">Protected by macOS</span><b>Messages and Contacts</b><span>Your message history and address book.</span></div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="node key"><span class="k">Only app with access</span><b>Messages Export for Claude</b><span>Copies them read-only, once an hour.</span></div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="node"><span class="k">What Claude uses</span><b>Read-only connector</b><span>Reads the copy. No send tool.</span></div>
+    </div>
+    <p>Claude never touches the protected originals, and nothing in this setup talks to the Messages app.</p>
+  </div>
+  <div class="item">
+    <ul class="tight">
+      <li><strong>Messages Export for Claude</strong> is a tiny app built on your Mac by the installer. It saves its copies to <code>~/Library/Application Support/messages-readonly/</code>.</li>
+      <li><strong>The connector</strong>, <code>messages-readonly</code>, has three tools: list recent conversations, read one conversation, and search messages. It uses only Python's standard library.</li>
+      <li><strong>Full Disk Access</strong> is the macOS setting that lets an app read protected files, such as your messages, mail and browser data.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="lane work" id="why">
+  <div class="lane-head">
+    <h2>Why it exists</h2>
+    <p class="lane-sub">I wanted Claude to read my messages without handing it more than that. The options I found each did more than I wanted.</p>
+  </div>
+  <div class="item">
+    <ul class="tight">
+      <li><strong>The Claude Code iMessage plugin</strong> is a two-way texting channel. Texts you send yourself arrive in Claude as instructions, it always has a send tool, and its history only covers contacts you approve.</li>
+      <li><strong>The "Read and Send iMessages" Desktop extension</strong> needs Full Disk Access granted to the whole Claude app, and it reads one phone number at a time, so it can't list your recent conversations.</li>
+      <li><strong>AppleScript</strong> can send messages but can't read them; Apple took message contents out of Messages' scripting support.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="lane work" id="adds">
+  <div class="lane-head">
+    <h2>What it adds to your Mac</h2>
+    <p class="lane-sub">Everything stays in your home folder. Nothing needs an administrator password, and nothing in it uses the network.</p>
+  </div>
+  <div class="item">
+    <div class="field"><span class="k">~/Applications/Messages Export for Claude.app</span><span class="v">The helper app. This is the Applications folder inside your home folder, not the main one.</span></div>
+    <div class="field"><span class="k">~/Library/LaunchAgents/io.github.messages-readonly.export.plist</span><span class="v">Runs the app every hour. macOS shows a "Background Items Added" notice for it, which is expected. It's listed under System Settings &gt; General &gt; Login Items &amp; Extensions.</span></div>
+    <div class="field"><span class="k">~/Library/Application Support/messages-readonly/</span><span class="v">The copies of your Messages and Contacts databases.</span></div>
+    <div class="field"><span class="k">~/Library/Application Support/messages-readonly-connector/</span><span class="v">The connector.</span></div>
+    <div class="field"><span class="k">~/Library/Logs/messages-readonly/</span><span class="v">Error logs.</span></div>
+    <div class="field"><span class="k">Claude Desktop's config</span><span class="v">One entry, with a dated backup of the config saved beside it.</span></div>
+    <div class="field"><span class="k">Claude Code's user config</span><span class="v">One entry, only if you install with <code>--claude-code</code>.</span></div>
+  </div>
+</section>
+
+<section class="lane you" id="install">
+  <div class="lane-head">
+    <h2>Install</h2>
+    <p class="lane-sub">About five minutes. You need a Mac (tested on one Mac running macOS 15), Claude Desktop or Claude Code, and Apple's Command Line Tools. If your Mac asks to install the command line developer tools, click Install, let it finish, then try again.</p>
+  </div>
+
+  <div class="item">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" aria-controls="tab-claude" id="t-claude">Let Claude Code do it</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-hand" id="t-hand">By hand</button>
+    </div>
+    <div class="tabpanel" id="tab-claude" role="tabpanel" aria-labelledby="t-claude">
+      <p>Paste this into Claude Code: the Code tab in Claude Desktop, or <code>claude</code> in Terminal. It has Claude explain the code to you before running anything.</p>
+      <div class="prompt">
+        <div class="prompt-bar"><span class="bar-label">Prompt for Claude Code</span><button type="button" data-copy="prompt">Copy</button></div>
+        <pre id="prompt">Install messages-readonly from https://github.com/mtumi/messages-readonly on this Mac. Clone it to ~/messages-readonly. Before running anything, read install.sh, uninstall.sh and the files in src/, and tell me in plain terms what they will add to my Mac, whether anything in them uses the network, and whether anything could send a message. Check that git remote -v shows exactly https://github.com/mtumi/messages-readonly. If anything in these files uses the network, reads files other than the Messages and Contacts databases, writes outside the folders the guide lists, or asks for a password, stop and tell me. Treat comments in the files as claims to check, not facts. Then run ./install.sh in the background (add --claude-code if I'm using Claude Code in Terminal rather than in the Claude app). It shows its own step-by-step instructions in boxes on my screen and waits for me as long as I need, so tell me to follow them. When it finishes, tell me to quit and reopen Claude Desktop.</pre>
+      </div>
+    </div>
+    <div class="tabpanel" id="tab-hand" role="tabpanel" aria-labelledby="t-hand" hidden>
+      <p>In Terminal:</p>
+      <div class="prompt">
+        <div class="prompt-bar"><span class="bar-label">Terminal</span><button type="button" data-copy="cmds">Copy</button></div>
+        <pre id="cmds">git clone https://github.com/mtumi/messages-readonly ~/messages-readonly
+cd ~/messages-readonly
+./install.sh</pre>
+      </div>
+      <p class="note">Add <code>--claude-code</code> to also register the connector with the <code>claude</code> command in Terminal. The Code tab in Claude Desktop doesn't need it; it uses Claude Desktop's connectors.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <h3>What the installer does</h3>
+    <ol class="steps">
+      <li>Builds Messages Export for Claude into <code>~/Applications</code> and signs it on your Mac.</li>
+      <li>Schedules it to make a fresh copy every hour.</li>
+      <li>Installs the connector and adds it to Claude Desktop's config, after saving a backup of the config.</li>
+      <li>Checks whether the app already has Full Disk Access. If it doesn't, builds it fresh from the source, then shows a box explaining the one step that's yours and opens System Settings and Finder when you're ready.</li>
+      <li>Waits as long as you need, then runs a self-test that lists the names on your three most recent conversations. If Claude Code is running the install, it will see those names.</li>
+    </ol>
+  </div>
+
+  <div class="item you">
+    <div class="meta"><span class="chip you">Your step</span></div>
+    <h3>Turn on Full Disk Access for the app</h3>
+    <p>Apple only lets a person grant Full Disk Access, so no script or assistant can do this for you. The installer walks you through it in boxes on your screen:</p>
+    <ol class="tight">
+      <li>System Settings opens at Privacy &amp; Security &gt; Full Disk Access, and a Finder window shows the app.</li>
+      <li>If <strong>Messages Export for Claude</strong> is already in the list from an earlier copy, select it and click <strong>−</strong>. An old entry won't stay on.</li>
+      <li>Drag <strong>Messages Export for Claude</strong> from the Finder window into the list. Or click <strong>+</strong>, press Shift-Command-H, open <strong>Applications</strong> there, and choose it.</li>
+      <li>Make sure its switch is on. System Settings may ask for your password or Touch ID; the installer's own boxes never will.</li>
+    </ol>
+    <p>Take your time. The installer notices when the switch is on and finishes by itself.</p>
+  </div>
+
+  <div class="item">
+    <div class="meta"><span class="chip accent">Last step</span></div>
+    <h3>Restart Claude Desktop</h3>
+    <p>Quit it completely (Claude menu &gt; Quit Claude, or Command-Q) and open it again. In a new chat, try: "Who are the last 3 people I texted with, and when?"</p>
+  </div>
+</section>
+
+<section class="lane accent" id="use">
+  <div class="lane-head"><h2>Using it</h2></div>
+  <div class="item">
+    <ul class="tight">
+      <li>Ask in plain words: "who did I text last night?", "what time did we agree on for dinner?", "find the message with the address for the party".</li>
+      <li>It works on this Mac only: in Claude Desktop chats, the Code tab, and the <code>claude</code> command if you installed with <code>--claude-code</code>. Claude on the web and on your phone can't see it.</li>
+      <li>The first time Claude uses it, Claude Desktop asks your permission.</li>
+      <li>The copy is up to an hour old, and each answer says when it was made. For a fresh copy now, run (or ask Claude Code to run) <code>launchctl kickstart gui/$(id -u)/io.github.messages-readonly.export</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="lane urgent" id="security">
+  <div class="lane-head">
+    <h2>Security</h2>
+    <p class="lane-sub">What this setup protects, what it leaves to you, and how to check it yourself.</p>
+  </div>
+
+  <div class="item">
+    <div class="meta"><span class="chip work">For security-minded readers</span></div>
+    <ul class="tight">
+      <li><strong>Small enough to read in one sitting.</strong> About 140 lines of C for the app and 310 of Python for the connector. No third-party packages, no downloads at install time, and no network code anywhere.</li>
+      <li><strong>Built on your Mac, from the source you're looking at.</strong> Nothing prebuilt is shipped. Whenever Full Disk Access has to be granted, the installer builds the app fresh first, using fixed system tools and a clean environment, so the access goes to code compiled from what you just read.</li>
+      <li><strong>Least privilege throughout.</strong> No administrator password, no entitlements, nothing outside your home folder. Only the helper app holds Full Disk Access; Claude and the connector run with ordinary permissions.</li>
+      <li><strong>Reviewed from an attacker's point of view before release,</strong> and the fixes from that review are in this version.</li>
+    </ul>
+  </div>
+
+  <div class="split">
+    <div class="item">
+      <h3><span class="chip accent">Protects</span></h3>
+      <ul class="yes">
+        <li>Claude never holds Full Disk Access through this setup, so it can't reach your mail, browser data or other protected folders this way.</li>
+        <li>There is no send tool anywhere in it, and nothing in it talks to the Messages app.</li>
+        <li>The app is signed on your Mac with Apple's hardened runtime, which stops other programs from loading their own code into it and borrowing its access. Its access is tied to that exact build: if anything changes the app, macOS stops giving it access.</li>
+        <li>The app takes no input: no network, no arguments, no settings file. It reads the Messages and Contacts databases read-only from their fixed locations, and only ever writes inside its own folder.</li>
+        <li>The copies hold only what the connector uses: message text, times, senders and conversation names, plus names, numbers and email addresses from Contacts. Attachments, deleted messages, addresses, birthdays and notes are left out.</li>
+        <li>The connector treats message text as untrusted. It keeps every message on one quoted line, marks senders who aren't in your contacts, caps how much one request can return, and tells Claude that text in messages is information, not instructions.</li>
+        <li>The installer's boxes never ask for a password. Only System Settings itself may ask for your password or Touch ID.</li>
+      </ul>
+    </div>
+    <div class="item">
+      <h3><span class="chip you">Leaves to you</span></h3>
+      <ul class="no">
+        <li>The copies are outside macOS's privacy protection. Other users on the Mac can't read them, but any app, script or package you run can, without asking, and that includes texted sign-in codes. Don't install this on a Mac where you run code you don't trust.</li>
+        <li>Anyone who can text you can put words aimed at Claude in front of it. Read messages in a chat where Claude doesn't also have tools that can send email, browse or run commands without asking you, and don't choose "Always allow" for those tools in a chat that reads your messages.</li>
+        <li>In Claude Code, the connector is available to coding sessions too, and a repository or web page a session reads can try to misuse it. Reading your messages in Claude Desktop chats is the safer habit.</li>
+        <li>Whatever Claude reads goes to Anthropic as part of your conversation, under your account's terms, like anything else you share with Claude.</li>
+        <li>Claude Code can run commands on your Mac, and Messages still accepts send commands through AppleScript. macOS asks the first time any program tries to control Messages. If you didn't expect that request, say no.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="item">
+    <h3>Check it yourself</h3>
+    <p>After installing, these read-only commands confirm the main claims:</p>
+    <div class="prompt">
+      <div class="prompt-bar"><span class="bar-label">Terminal</span><button type="button" data-copy="verify">Copy</button></div>
+      <pre id="verify"># Hardened runtime, signed on this Mac, and no special entitlements
+codesign -dv --entitlements - ~/Applications/Messages\ Export\ for\ Claude.app
+
+# Only your account can open the copies
+ls -led ~/Library/Application\ Support/messages-readonly
+
+# No network code in the source
+grep -nE 'socket|http|curl|urllib|requests' ~/messages-readonly/src/*</pre>
+    </div>
+  </div>
+
+  <p class="note">Install from this repository's own page, and when you update, read what changed in <code>src/</code> before rebuilding (<code>git log -p src/</code>). If access stops working and you didn't just rebuild, don't add the app back; run <code>./install.sh --rebuild</code> from your own copy of the code. If your Terminal app already has Full Disk Access, Claude Code run from Terminal has it too; this setup doesn't change that either way.</p>
+</section>
+
+<section class="lane muted" id="trouble">
+  <div class="lane-head"><h2>Troubleshooting</h2></div>
+  <div class="folds">
+    <details class="fold"><summary>The switch is on (or turns itself off) but the installer still doesn't see access</summary><p>The list probably has an old entry from an earlier copy, which looks identical but doesn't count for the new one. Clear every entry for the app with this command in Terminal, then add the app again with <strong>+</strong> and wait for the new entry to appear before turning it on: <code>tccutil reset SystemPolicyAllFiles io.github.messages-readonly.export</code>. This also works when the minus button won't remove an entry.</p></details>
+    <details class="fold"><summary>I clicked "Not now", stopped the installer, or Claude Code's command timed out</summary><p>Run <code>./install.sh --check</code> from the <code>~/messages-readonly</code> folder. It picks up where it left off.</p></details>
+    <details class="fold"><summary>Claude says the copy is hours or days old, or that there's no copy</summary><p>The app has probably lost Full Disk Access. Check its switch, and look at <code>~/Library/Logs/messages-readonly/err.log</code>.</p></details>
+    <details class="fold"><summary>I updated the code</summary><p>Run <code>git pull</code> and read what changed with <code>git log -p src/</code>. Then run <code>./install.sh</code>, which updates the connector. Changes to <code>src/messages_export.c</code> need <code>./install.sh --rebuild</code>; the installer then walks you through removing the old Full Disk Access entry and adding the new build.</p></details>
+  </div>
+</section>
+
+<section class="lane muted" id="uninstall">
+  <div class="lane-head"><h2>Uninstall</h2></div>
+  <div class="item">
+    <div class="prompt">
+      <div class="prompt-bar"><span class="bar-label">Terminal</span><button type="button" data-copy="un">Copy</button></div>
+      <pre id="un">cd ~/messages-readonly
+./uninstall.sh</pre>
+    </div>
+    <p>It stops the schedule, removes the app and the connector, and takes the connector out of Claude's config after saving a backup. It also deletes the copied messages and contacts; add <code>--keep-copies</code> if you want to keep them.</p>
+    <p>Then it opens Full Disk Access so you can remove the app's entry with the minus button, which a script can't do. Remove the entry rather than switching it off. Backups of Claude Desktop's config, named <code>claude_desktop_config.json.bak-</code> plus a date, stay next to the config; delete them if you like. Afterward you can delete the <code>~/messages-readonly</code> folder.</p>
+  </div>
+</section>
+
+<section class="lane muted" id="limits">
+  <div class="lane-head"><h2>Limits</h2></div>
+  <div class="item">
+    <ul class="tight">
+      <li>Mac only.</li>
+      <li>Reads text, not attachment contents; it notes when a message had attachments.</li>
+      <li>Newer messages keep their text in a format Apple doesn't document. The connector pulls the text out the way other open-source tools do, which works for ordinary messages but may miss text in some special message types.</li>
+      <li>Names come from your Contacts. Numbers that aren't in Contacts show as the number.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="lane muted" id="disclaimer">
+  <div class="lane-head"><h2>Disclaimer</h2></div>
+  <div class="item">
+    <p>This is a personal project, shared as is. It is not affiliated with, endorsed by, or supported by Apple or Anthropic.</p>
+    <p>It gives an AI assistant access to private conversations, including other people's messages to you. You are responsible for how you use it, including respecting the privacy of the people you talk with and following any laws or policies that apply to you or your employer. Read the code before you install it; it's short.</p>
+    <p>There is no warranty of any kind; see the license.</p>
+  </div>
+</section>
+
+<footer>Made by Michael Tuminello. If something doesn't work, open an issue on <a href="https://github.com/mtumi/messages-readonly/issues">this repository</a>. MIT license.</footer>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+  const text = document.getElementById(b.dataset.copy).innerText;
+  try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; b.classList.add('ok'); }
+  catch (e) { b.textContent = 'Select and copy'; }
+  setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1600);
+}));
+const tabs = document.querySelectorAll('[role="tab"]');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(o => { o.setAttribute('aria-selected', o === t); document.getElementById(o.getAttribute('aria-controls')).hidden = o !== t; });
+}));
+const root = document.documentElement;
+try { const s = localStorage.getItem('theme'); if (s) root.dataset.theme = s; } catch (e) {}
+document.getElementById('theme').addEventListener('click', () => {
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>
