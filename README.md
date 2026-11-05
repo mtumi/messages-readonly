@@ -8,7 +8,7 @@ Lets Claude read your iMessage and SMS history on a Mac, without giving Claude F
 
 - A tiny app, built on your Mac by the installer, is the only program with Full Disk Access. Once an hour it copies your Messages and Contacts databases read-only.
 - A read-only connector lets Claude Desktop and Claude Code read that copy. It has no send tool, and nothing in it uses the network.
-- One step is yours: macOS only lets a person grant Full Disk Access, so you turn on one toggle in System Settings.
+- One step is yours: macOS only lets a person grant Full Disk Access, so you turn on one switch in System Settings. The installer pops up a box with step-by-step instructions for it, opens the right windows, and waits for you.
 
 ## Quick install
 
