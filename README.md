@@ -14,15 +14,13 @@ Lets Claude read your iMessage and SMS history on a Mac, without giving Claude F
 
 **Does it copy my photos, videos and attachments?** No, text only. Media lives in a separate Attachments folder that the app never opens, and the copy keeps only message text, times, senders and conversation names. On one Mac, a 447 MB Messages database became an 84 MB copy, contacts included. Each hourly run replaces the copy, so it doesn't pile up.
 
-## Quick install
+## Install
 
-```
-git clone https://github.com/mtumi/messages-readonly ~/messages-readonly
-cd ~/messages-readonly
-./install.sh
-```
+You need a Mac and Claude Desktop. The easiest way is to let Claude Code install it: copy the [install prompt from the guide](https://mtumi.github.io/messages-readonly/#install), which has Claude read and explain the code to you before running anything, then walks you through the rest. The guide also has the full steps for installing by hand.
 
-Or paste the install prompt from the guide into Claude Code and let it walk you through.
+One step is always yours: macOS only lets a person turn on Full Disk Access, so a box on screen walks you through it in System Settings.
+
+So far it has been tested on one Mac, running macOS 15. If something goes wrong, the guide's [troubleshooting section](https://mtumi.github.io/messages-readonly/#trouble) covers the common problems.
 
 ## License and disclaimer
 
