@@ -112,7 +112,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
     <span class="chip accent">Read-only</span><span class="chip accent">No send tool</span><span class="chip accent">No network</span><span class="chip work">Free · MIT license</span>
   </div>
   <nav class="toc" aria-label="Sections">
-    <a href="#how">How it works</a><a href="#why">Why</a><a href="#adds">What it adds</a><a href="#install">Install</a><a href="#use">Using it</a><a href="#security">Security</a><a href="#trouble">Troubleshooting</a><a href="#uninstall">Uninstall</a><a href="#limits">Limits</a><a href="#disclaimer">Disclaimer</a>
+    <a href="#how">How it works</a><a href="#why">Why</a><a href="#adds">What it adds</a><a href="#install">Install</a><a href="#use">Using it</a><a href="#security">Security</a><a href="#faq">Questions</a><a href="#trouble">Troubleshooting</a><a href="#uninstall">Uninstall</a><a href="#limits">Limits</a><a href="#disclaimer">Disclaimer</a>
   </nav>
 </header>
 
@@ -301,6 +301,14 @@ grep -nE 'socket|http|curl|urllib|requests' ~/messages-readonly/src/*</pre>
   </div>
 
   <p class="note">Install from this repository's own page, and when you update, read what changed in <code>src/</code> before rebuilding (<code>git log -p src/</code>). If access stops working and you didn't just rebuild, don't add the app back; run <code>./install.sh --rebuild</code> from your own copy of the code. If your Terminal app already has Full Disk Access, Claude Code run from Terminal has it too; this setup doesn't change that either way.</p>
+</section>
+
+<section class="lane work" id="faq">
+  <div class="lane-head"><h2>Questions</h2></div>
+  <div class="folds">
+    <details class="fold"><summary>Does it copy my photos, videos and attachments?</summary><p>No. It copies text only. Photos, videos and files aren't stored in the Messages database at all; they live in a separate Attachments folder that the app never opens. The copy keeps only what the connector needs: message text, time, sender, which conversation it's in, and conversation names. For attachments it keeps just enough to say a message had them. On one Mac, a 447 MB Messages database became an 84 MB copy, contacts included.</p></details>
+    <details class="fold"><summary>Does the copy keep growing?</summary><p>No. Each hourly run replaces the previous copy rather than adding to it, so it only grows as your own message history does.</p></details>
+  </div>
 </section>
 
 <section class="lane muted" id="trouble">

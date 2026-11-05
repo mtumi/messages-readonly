@@ -10,6 +10,10 @@ Lets Claude read your iMessage and SMS history on a Mac, without giving Claude F
 - A read-only connector lets Claude Desktop and Claude Code read that copy. It has no send tool, and nothing in it uses the network.
 - One step is yours: macOS only lets a person grant Full Disk Access, so you turn on one switch in System Settings. The installer pops up a box with step-by-step instructions for it, opens the right windows, and waits for you.
 
+## Questions
+
+**Does it copy my photos, videos and attachments?** No, text only. Media lives in a separate Attachments folder that the app never opens, and the copy keeps only message text, times, senders and conversation names. On one Mac, a 447 MB Messages database became an 84 MB copy, contacts included. Each hourly run replaces the copy, so it doesn't pile up.
+
 ## Quick install
 
 ```
