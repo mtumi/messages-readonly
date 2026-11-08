@@ -295,8 +295,8 @@ codesign -dv --entitlements - ~/Applications/Messages\ Export\ for\ Claude.app
 # Only your account can open the copies
 ls -led ~/Library/Application\ Support/messages-readonly
 
-# No network code in the source
-grep -nE 'socket|http|curl|urllib|requests' ~/messages-readonly/src/*</pre>
+# No network code in the source (prints nothing)
+grep -nE 'socket|http|curl|urllib|import requests|NSURL' ~/messages-readonly/src/*</pre>
     </div>
   </div>
 
