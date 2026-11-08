@@ -1,6 +1,6 @@
 // Messages Export for Claude: the only program that holds Full Disk Access for Messages.
 // It opens the Messages and Contacts databases read-only and writes a reduced
-// copy of each, holding only what the connector uses, to
+// copy of each, holding only the tables and columns listed below, to
 // ~/Library/Application Support/messages-readonly/, which Claude reads through
 // the connector. It cannot send: it never talks to Messages.app.
 //
@@ -18,21 +18,30 @@
 #include <sqlite3.h>
 
 // Only these tables and columns are copied. Everything else in the originals
-// (deleted messages, attachment paths, addresses, birthdays, notes) stays behind.
+// (attachment files and paths, addresses, birthdays, notes) stays behind. Messages
+// in Recently Deleted are still rows in the message table, so they are copied too;
+// messages deleted for good are not, since the copy is rebuilt row by row.
 static const char *MESSAGES_SQL =
     "CREATE TABLE message(ROWID INTEGER PRIMARY KEY, date INTEGER, is_from_me INTEGER,"
-    "  handle_id INTEGER, text TEXT, attributedBody BLOB);"
-    "INSERT INTO message SELECT ROWID, date, is_from_me, handle_id, text, attributedBody FROM src.message;"
-    "CREATE TABLE chat(ROWID INTEGER PRIMARY KEY, display_name TEXT);"
-    "INSERT INTO chat SELECT ROWID, display_name FROM src.chat;"
+    "  handle_id INTEGER, text TEXT, attributedBody BLOB, guid TEXT, associated_message_type INTEGER);"
+    "INSERT INTO message SELECT ROWID, date, is_from_me, handle_id, text, attributedBody, guid,"
+    "  associated_message_type FROM src.message;"
+    // guid and chat_identifier stay the same across copies; is_filtered marks Messages' junk folder.
+    "CREATE TABLE chat(ROWID INTEGER PRIMARY KEY, display_name TEXT, guid TEXT, chat_identifier TEXT,"
+    "  service_name TEXT, style INTEGER, is_filtered INTEGER);"
+    "INSERT INTO chat SELECT ROWID, display_name, guid, chat_identifier, service_name, style, is_filtered"
+    "  FROM src.chat;"
     "CREATE TABLE handle(ROWID INTEGER PRIMARY KEY, id TEXT);"
     "INSERT INTO handle SELECT ROWID, id FROM src.handle;"
     "CREATE TABLE chat_message_join(chat_id INTEGER, message_id INTEGER);"
     "INSERT INTO chat_message_join SELECT chat_id, message_id FROM src.chat_message_join;"
     "CREATE TABLE chat_handle_join(chat_id INTEGER, handle_id INTEGER);"
     "INSERT INTO chat_handle_join SELECT chat_id, handle_id FROM src.chat_handle_join;"
-    "CREATE TABLE message_attachment_join(message_id INTEGER);"
-    "INSERT INTO message_attachment_join SELECT message_id FROM src.message_attachment_join;"
+    "CREATE TABLE message_attachment_join(message_id INTEGER, attachment_id INTEGER);"
+    "INSERT INTO message_attachment_join SELECT message_id, attachment_id FROM src.message_attachment_join;"
+    // Attachment names only, as the sender named them; never the files or their paths.
+    "CREATE TABLE attachment(ROWID INTEGER PRIMARY KEY, transfer_name TEXT);"
+    "INSERT INTO attachment SELECT ROWID, transfer_name FROM src.attachment;"
     "CREATE INDEX cmj_chat ON chat_message_join(chat_id);"
     "CREATE INDEX cmj_msg ON chat_message_join(message_id);"
     "CREATE INDEX chj_chat ON chat_handle_join(chat_id);"

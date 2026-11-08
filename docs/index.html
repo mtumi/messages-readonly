@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>messages-readonly</title>
-<meta name="description" content="Let Claude read your iMessage history on a Mac, without giving Claude Full Disk Access and with no way to send.">
+<meta name="description" content="Let Claude read your iMessage history on a Mac through a read-only MCP server, without giving Claude Full Disk Access and with no way to send.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap">
@@ -109,7 +109,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
   <h1>messages-readonly</h1>
   <p class="standfirst">Lets Claude read your iMessage and SMS history on a Mac, without giving Claude Full Disk Access and without giving this setup any way to send a text.</p>
   <div class="meta">
-    <span class="chip accent">Read-only</span><span class="chip accent">No send tool</span><span class="chip accent">No network</span><span class="chip work">Free · MIT license</span>
+    <span class="chip accent">MCP server</span><span class="chip accent">Read-only</span><span class="chip accent">No send tool</span><span class="chip accent">No network</span><span class="chip work">Free · MIT license</span>
   </div>
   <nav class="toc" aria-label="Sections">
     <a href="#how">How it works</a><a href="#why">Why</a><a href="#adds">What it adds</a><a href="#install">Install</a><a href="#use">Using it</a><a href="#security">Security</a><a href="#faq">Questions</a><a href="#trouble">Troubleshooting</a><a href="#uninstall">Uninstall</a><a href="#limits">Limits</a><a href="#disclaimer">Disclaimer</a>
@@ -127,14 +127,14 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
       <div class="arrow" aria-hidden="true">→</div>
       <div class="node key"><span class="k">Only app with access</span><b>Messages Export for Claude</b><span>Copies them read-only, once an hour.</span></div>
       <div class="arrow" aria-hidden="true">→</div>
-      <div class="node"><span class="k">What Claude uses</span><b>Read-only connector</b><span>Reads the copy. No send tool.</span></div>
+      <div class="node"><span class="k">What Claude uses</span><b>Read-only MCP server</b><span>Reads the copy. No send tool.</span></div>
     </div>
     <p>Claude never touches the protected originals, and nothing in this setup talks to the Messages app.</p>
   </div>
   <div class="item">
     <ul class="tight">
       <li><strong>Messages Export for Claude</strong> is a tiny app built on your Mac by the installer. It saves its copies to <code>~/Library/Application Support/messages-readonly/</code>.</li>
-      <li><strong>The connector</strong>, <code>messages-readonly</code>, has three tools: list recent conversations, read one conversation, and search messages. It uses only Python's standard library.</li>
+      <li><strong>The connector</strong>, <code>messages-readonly</code>, is a local Model Context Protocol (MCP) server. Claude Desktop and Claude Code start it and talk to it over standard input and output. It has three tools: list recent conversations, read one conversation, and search messages, each marked read-only. It is written directly from the protocol specification (the startup handshake, tool listing and tool calls) using only Python's standard library, with no SDK.</li>
       <li><strong>Full Disk Access</strong> is the macOS setting that lets an app read protected files, such as your messages, mail and browser data.</li>
     </ul>
   </div>
@@ -238,7 +238,7 @@ cd ~/messages-readonly
       <li>Ask in plain words: "who did I text last night?", "what time did we agree on for dinner?", "find the message with the address for the party".</li>
       <li>It works on this Mac only: in Claude Desktop chats, the Code tab, and the <code>claude</code> command if you installed with <code>--claude-code</code>. Claude on the web and on your phone can't see it.</li>
       <li>The first time Claude uses it, Claude Desktop asks your permission.</li>
-      <li>The copy is up to an hour old, and each answer says when it was made. For a fresh copy now, run (or ask Claude Code to run) <code>launchctl kickstart gui/$(id -u)/io.github.messages-readonly.export</code>.</li>
+      <li>The copy is refreshed every hour while you're logged in, so it's usually under an hour old, and each answer says when it was made. For a fresh copy now, run (or ask Claude Code to run) <code>launchctl kickstart gui/$(id -u)/io.github.messages-readonly.export</code>.</li>
     </ul>
   </div>
 </section>
@@ -252,7 +252,7 @@ cd ~/messages-readonly
   <div class="item">
     <div class="meta"><span class="chip work">For security-minded readers</span></div>
     <ul class="tight">
-      <li><strong>Small enough to read in one sitting.</strong> About 140 lines of C for the app and 310 of Python for the connector. No third-party packages, no downloads at install time, and no network code anywhere.</li>
+      <li><strong>Small enough to read in one sitting.</strong> About 140 lines of C for the app and 330 of Python for the MCP server. No third-party packages, no downloads at install time, and no network code anywhere.</li>
       <li><strong>Built on your Mac, from the source you're looking at.</strong> Nothing prebuilt is shipped. Whenever Full Disk Access has to be granted, the installer builds the app fresh first, using fixed system tools and a clean environment, so the access goes to code compiled from what you just read.</li>
       <li><strong>Least privilege throughout.</strong> No administrator password, no entitlements, nothing outside your home folder. Only the helper app holds Full Disk Access; Claude and the connector run with ordinary permissions.</li>
       <li><strong>Reviewed from an attacker's point of view before release,</strong> and the fixes from that review are in this version.</li>
@@ -267,7 +267,7 @@ cd ~/messages-readonly
         <li>There is no send tool anywhere in it, and nothing in it talks to the Messages app.</li>
         <li>The app is signed on your Mac with Apple's hardened runtime, which stops other programs from loading their own code into it and borrowing its access. Its access is tied to that exact build: if anything changes the app, macOS stops giving it access.</li>
         <li>The app takes no input: no network, no arguments, no settings file. It reads the Messages and Contacts databases read-only from their fixed locations, and only ever writes inside its own folder.</li>
-        <li>The copies hold only what the connector uses: message text, times, senders and conversation names, plus names, numbers and email addresses from Contacts. Attachments, deleted messages, addresses, birthdays and notes are left out.</li>
+        <li>The copies hold message text, times, senders, conversation names and attachment file names, plus names, numbers and email addresses from Contacts. Messages in Recently Deleted are copied too; messages deleted for good are not. Attachment files and where they're stored, addresses, birthdays and notes are left out.</li>
         <li>The connector treats message text as untrusted. It keeps every message on one quoted line, marks senders who aren't in your contacts, caps how much one request can return, and tells Claude that text in messages is information, not instructions.</li>
         <li>The installer's boxes never ask for a password. Only System Settings itself may ask for your password or Touch ID.</li>
       </ul>
@@ -306,7 +306,7 @@ grep -nE 'socket|http|curl|urllib|requests' ~/messages-readonly/src/*</pre>
 <section class="lane work" id="faq">
   <div class="lane-head"><h2>Questions</h2></div>
   <div class="folds">
-    <details class="fold"><summary>Does it copy my photos, videos and attachments?</summary><p>No. It copies text only. Photos, videos and files aren't stored in the Messages database at all; they live in a separate Attachments folder that the app never opens. The copy keeps only what the connector needs: message text, time, sender, which conversation it's in, and conversation names. For attachments it keeps just enough to say a message had them. On one Mac, a 447 MB Messages database became an 84 MB copy, contacts included.</p></details>
+    <details class="fold"><summary>Does it copy my photos, videos and attachments?</summary><p>No. It copies text only. Photos, videos and files aren't stored in the Messages database at all; they live in a separate Attachments folder that the app never opens. The copy keeps message text, time, sender, which conversation it's in, and conversation names. For attachments it keeps only the file name as it was sent, never the file itself or where it's stored. On one Mac, a 447 MB Messages database became an 84 MB copy, contacts included.</p></details>
     <details class="fold"><summary>Does the copy keep growing?</summary><p>No. Each hourly run replaces the previous copy rather than adding to it, so it only grows as your own message history does.</p></details>
   </div>
 </section>
